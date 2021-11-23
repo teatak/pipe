@@ -38,6 +38,17 @@ func NewServer() (*Server, error) {
 	return server, nil
 }
 
+func (s *Server) Reload() error {
+	s.shutdownLock.Lock()
+	defer s.shutdownLock.Unlock()
+
+	if s.shutdown {
+		return nil
+	}
+
+	return nil
+}
+
 func (s *Server) Shutdown() error {
 	s.shutdownLock.Lock()
 	defer s.shutdownLock.Unlock()

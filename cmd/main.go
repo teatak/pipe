@@ -7,6 +7,7 @@ import (
 	"github.com/teatak/pipe/cli"
 	"github.com/teatak/pipe/cmd/cli/daem"
 	"github.com/teatak/pipe/cmd/cli/quit"
+	"github.com/teatak/pipe/cmd/cli/reload"
 	"github.com/teatak/pipe/cmd/cli/run"
 	"github.com/teatak/pipe/cmd/cli/version"
 	"github.com/teatak/pipe/common"
@@ -18,6 +19,7 @@ func init() {
 	Commands = cli.Commands{
 		"version": version.New(common.Version),
 		"daem":    daem.New(),
+		"reload":  reload.New(),
 		"quit":    quit.New(),
 		"run":     run.New(),
 	}

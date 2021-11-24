@@ -1,5 +1,5 @@
-/go.sum
-/logs
-/run
+go.sum
+logs/
+run/
 .DS_Store
-/pipe
+pipe

@@ -13,31 +13,14 @@ import (
 )
 
 const synopsis = "Run Pipe as service "
-const help = `Usage: daem [options]
+const help = `Usage: daem
 
   Run pipe as daemon service
-
-Options:
-
-  -name       Node name
-  -dc         DataCenter name
-  -http       Http address of riff (-http 127.0.0.1:8610)
-  -rpc        RPC address of riff (-rpc [::]:8630)
-  -join       Join RPC address (-join 192.168.1.1:8630,192.168.1.2:8630,192.168.1.3:8630)
+  
 `
-
-const infoServerPrefix = "[INFO] pipe.server: "
 
 type cmd struct {
 	flags *flag.FlagSet
-	help  string
-	// flags
-	name string
-	dc   string
-	http string
-	dns  string
-	rpc  string
-	join string
 }
 
 func New() *cmd {
@@ -47,13 +30,7 @@ func New() *cmd {
 }
 
 func (c *cmd) init() {
-	c.flags = flag.NewFlagSet("start", flag.ContinueOnError)
-	c.flags.StringVar(&c.http, "http", "", "usage")
-	c.flags.StringVar(&c.dns, "dns", "", "usage")
-	c.flags.StringVar(&c.rpc, "rpc", "", "usage")
-	c.flags.StringVar(&c.name, "name", "", "usage")
-	c.flags.StringVar(&c.join, "join", "", "usage")
-	c.flags.StringVar(&c.dc, "dc", "", "usage")
+	c.flags = flag.NewFlagSet("daem", flag.ContinueOnError)
 
 	c.flags.Usage = func() {
 		fmt.Println(c.Help())

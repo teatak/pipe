@@ -8,10 +8,10 @@ import (
 	"github.com/teatak/pipe/cmd/cli"
 )
 
-const help = `Usage: pipe reload
+const help = `Usage: reload
 
-Options:
-
+  Reload pipe config
+  
 `
 
 type cmd struct {

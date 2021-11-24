@@ -9,7 +9,10 @@ import (
 	"github.com/teatak/pipe/cmd/cli"
 )
 
-const help = `Usage: pipe quit
+const help = `Usage: quit
+
+  Quit pipe
+  
 `
 
 type cmd struct {

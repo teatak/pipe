@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -8,18 +9,22 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"os/signal"
 	"sync"
-	"syscall"
+	"time"
 
+	"github.com/teatak/cart"
 	"github.com/teatak/pipe/sections"
 )
+
+const errorServerPrefix = "[ERR]  pipe.server: "
+const infoServerPrefix = "[INFO] pipe.server: "
 
 var server *Server
 
 type Server struct {
 	Logger       *log.Logger
 	ShutdownCh   chan struct{}
+	httpServers  []*http.Server
 	shutdown     bool
 	shutdownLock sync.Mutex
 }
@@ -29,13 +34,46 @@ func NewServer() (*Server, error) {
 	shutdownCh := make(chan struct{})
 
 	server = &Server{
-		ShutdownCh: shutdownCh,
+		ShutdownCh:  shutdownCh,
+		shutdown:    false,
+		httpServers: []*http.Server{},
 	}
 
 	logOutput := io.MultiWriter(os.Stderr)
 	server.Logger = log.New(logOutput, "", log.LstdFlags|log.Lmicroseconds)
 
+	if err := server.setupCart(); err != nil {
+		server.Shutdown()
+		return nil, fmt.Errorf(errorServerPrefix+"%v", err)
+	}
+
+	go server.listenHttp() //listen http
 	return server, nil
+}
+
+func (s *Server) setupCart() error {
+	cart.SetMode(cart.ReleaseMode)
+	r := cart.New()
+
+	r.Route("/").ANY(func(c *cart.Context, n cart.Next) {
+		c.JSON(200, cart.H{"code": 200})
+		n()
+	})
+	s.httpServers = append(s.httpServers, r.ServerKeepAlive(":80"))
+	return nil
+}
+
+func (s *Server) listenHttp() {
+	for _, sv := range s.httpServers {
+		go func(sv *http.Server) {
+			s.Logger.Printf(infoServerPrefix+"start to accept http conn: %v\n", sv.Addr)
+			err := sv.ListenAndServe()
+			if err != http.ErrServerClosed {
+				s.Logger.Printf(errorServerPrefix+"start http server error: %s\n", err)
+			}
+			s.Logger.Printf(infoServerPrefix + "stop http server\n")
+		}(sv)
+	}
 }
 
 func (s *Server) Reload() error {
@@ -45,7 +83,18 @@ func (s *Server) Reload() error {
 	if s.shutdown {
 		return nil
 	}
+	//stop all httpServer
+	for _, sv := range s.httpServers {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		sv.Shutdown(ctx)
+	}
+	//reload config
+	sections.Load()
 
+	s.httpServers = []*http.Server{}
+	s.setupCart()
+	go server.listenHttp() //listen http
 	return nil
 }
 
@@ -58,7 +107,7 @@ func (s *Server) Shutdown() error {
 	}
 
 	s.shutdown = true
-	close(s.ShutdownCh)
+	s.ShutdownCh <- struct{}{}
 	return nil
 }
 
@@ -109,61 +158,61 @@ func ProxyRequestHandler(proxy *httputil.ReverseProxy) func(http.ResponseWriter,
 	}
 }
 
-func Run() {
+// func Run() {
 
-	shutdownCh := make(chan struct{})
+// 	shutdownCh := make(chan struct{})
 
-	for k, v := range sections.Endpoint {
-		fmt.Println(k, v)
-	}
+// 	for k, v := range sections.Endpoint {
+// 		fmt.Println(k, v)
+// 	}
 
-	for k, v := range sections.Servers {
-		fmt.Println(k, v)
-	}
-	// initialize a reverse proxy and pass the actual backend server url here
-	// proxy, err := NewProxy("http://127.0.0.1:8091")
-	// if err != nil {
-	// 	panic(err)
-	// }
+// 	for k, v := range sections.Servers {
+// 		fmt.Println(k, v)
+// 	}
+// 	// initialize a reverse proxy and pass the actual backend server url here
+// 	// proxy, err := NewProxy("http://127.0.0.1:8091")
+// 	// if err != nil {
+// 	// 	panic(err)
+// 	// }
 
-	// c := cart.Default()
+// 	// c := cart.Default()
 
-	// c.Route("/", func(r *cart.Router) {
-	// 	c.Route("/").ANY(func(c *cart.Context, n cart.Next) {
-	// 		fmt.Println("/")
-	// 		proxy.ServeHTTP(c.Response, c.Request)
-	// 	})
-	// 	c.Route("/api").ANY(func(c *cart.Context, n cart.Next) {
-	// 		fmt.Println("/api")
-	// 		proxy.ServeHTTP(c.Response, c.Request)
-	// 		n()
-	// 	})
-	// 	c.Route("/api/*path").ANY(func(c *cart.Context, n cart.Next) {
-	// 		fmt.Println("/api/test")
-	// 		proxy.ServeHTTP(c.Response, c.Request)
-	// 		n()
-	// 	})
-	// })
+// 	// c.Route("/", func(r *cart.Router) {
+// 	// 	c.Route("/").ANY(func(c *cart.Context, n cart.Next) {
+// 	// 		fmt.Println("/")
+// 	// 		proxy.ServeHTTP(c.Response, c.Request)
+// 	// 	})
+// 	// 	c.Route("/api").ANY(func(c *cart.Context, n cart.Next) {
+// 	// 		fmt.Println("/api")
+// 	// 		proxy.ServeHTTP(c.Response, c.Request)
+// 	// 		n()
+// 	// 	})
+// 	// 	c.Route("/api/*path").ANY(func(c *cart.Context, n cart.Next) {
+// 	// 		fmt.Println("/api/test")
+// 	// 		proxy.ServeHTTP(c.Response, c.Request)
+// 	// 		n()
+// 	// 	})
+// 	// })
 
-	// _, _ = c.Run(":80")
+// 	// _, _ = c.Run(":80")
 
-	sigs := make(chan os.Signal, 10)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR2)
-	go func() {
-		for {
-			sig := <-sigs
-			fmt.Println()
-			log.Printf("get signal %v\n", sig)
-			if sig == syscall.SIGUSR2 {
-				//grace reload
-				// s.Self.LoadServices()
-				// s.Shutter()
-				close(shutdownCh)
-			} else {
-				close(shutdownCh)
-				//s.Shutdown()
-			}
-		}
-	}()
-	<-shutdownCh
-}
+// 	sigs := make(chan os.Signal, 10)
+// 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR2)
+// 	go func() {
+// 		for {
+// 			sig := <-sigs
+// 			fmt.Println()
+// 			log.Printf("get signal %v\n", sig)
+// 			if sig == syscall.SIGUSR2 {
+// 				//grace reload
+// 				// s.Self.LoadServices()
+// 				// s.Shutter()
+// 				close(shutdownCh)
+// 			} else {
+// 				close(shutdownCh)
+// 				//s.Shutdown()
+// 			}
+// 		}
+// 	}()
+// 	<-shutdownCh
+// }

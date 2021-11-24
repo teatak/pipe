@@ -21,13 +21,12 @@ func (c *cmd) Run(args []string) int {
 		fmt.Println(err)
 		return 1
 	}
-	s.Logger.Printf(infoServerPrefix + "start server\n")
+	s.Logger.Printf(infoServerPrefix+"start server %v\n", os.Getpid())
 	sigs := make(chan os.Signal, 10)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR2)
 	go func() {
 		for {
 			sig := <-sigs
-			fmt.Println()
 			s.Logger.Printf(infoServerPrefix+"get signal %v\n", sig)
 			if sig == syscall.SIGUSR2 {
 				//grace reload

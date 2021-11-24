@@ -22,7 +22,7 @@ func (c *cmd) Run(args []string) int {
 		fmt.Println(err)
 		return 1
 	}
-	s.Logger.Printf(infoServerPrefix + "start server\n")
+	s.Logger.Printf(infoServerPrefix+"start server %v\n", os.Getpid())
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {

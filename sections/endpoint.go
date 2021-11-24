@@ -1,7 +1,5 @@
 package sections
 
-import "github.com/teatak/config"
-
 type endpoint struct {
 	Method  string   `yaml:"method,omitempty"`
 	Servers []string `yaml:"servers,omitempty"`
@@ -13,8 +11,4 @@ func (s *endpointSection) SectionName() string {
 	return "endpoint"
 }
 
-var Endpoint = endpointSection{}
-
-func init() {
-	config.Load(&Endpoint)
-}
+var Endpoint = &endpointSection{}

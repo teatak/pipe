@@ -1,5 +1,7 @@
 # pipe
 
+a reverse proxy server
+
 ```yaml
 riff:
   url: riff://localhost:8610

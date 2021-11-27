@@ -1,5 +1,6 @@
 package sections
 
+//load section in load.go file
 type riff struct {
 	Url string `yaml:"url,omitempty"`
 }

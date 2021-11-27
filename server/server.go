@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -42,38 +44,84 @@ func NewServer() (*Server, error) {
 	logOutput := io.MultiWriter(os.Stderr)
 	server.Logger = log.New(logOutput, "", log.LstdFlags|log.Lmicroseconds)
 
-	if err := server.setupCart(); err != nil {
-		server.Shutdown()
-		return nil, fmt.Errorf(errorServerPrefix+"%v", err)
-	}
+	go server.setupCart()
 
-	go server.listenHttp() //listen http
 	return server, nil
 }
 
 func (s *Server) setupCart() error {
-	cart.SetMode(cart.ReleaseMode)
-	r := cart.New()
+	for _, sv := range *sections.Server {
+		cart.SetMode(cart.ReleaseMode)
+		r := cart.New()
 
-	r.Route("/").ANY(func(c *cart.Context, n cart.Next) {
-		c.JSON(200, cart.H{"code": 200})
-		n()
-	})
-	s.httpServers = append(s.httpServers, r.ServerKeepAlive(":80"))
-	return nil
-}
+		//构造
+		r.Use("/", func(c *cart.Context, n cart.Next) {
+			switch c.Request.Host {
 
-func (s *Server) listenHttp() {
-	for _, sv := range s.httpServers {
-		go func(sv *http.Server) {
-			s.Logger.Printf(infoServerPrefix+"start to accept http conn: %v\n", sv.Addr)
-			err := sv.ListenAndServe()
-			if err != http.ErrServerClosed {
-				s.Logger.Printf(errorServerPrefix+"start http server error: %s\n", err)
 			}
-			s.Logger.Printf(infoServerPrefix + "stop http server\n")
-		}(sv)
+			// sort.Slice(sv.Domain, func(i, j int) bool {
+			// 	return sv.Domain[j].Name == "_"
+			// })
+			//match host
+			//sort domain name
+			findHost := false
+			for _, domain := range sv.Domain {
+				for _, _ = range domain.Location {
+					//fmt.Println(path, localtion)
+				}
+				if strings.EqualFold(domain.Name, c.Request.Host) {
+					findHost = true
+					if c.Request.TLS == nil {
+						c.Redirect(301, "https://"+c.Request.Host+c.Request.RequestURI)
+					} else {
+						c.JSON(200, cart.H{"code": 200})
+					}
+				}
+			}
+			if !findHost {
+				if c.Request.TLS == nil {
+					c.Redirect(301, "https://"+c.Request.Host+c.Request.RequestURI)
+				} else {
+					c.JSON(200, cart.H{"code": 200})
+				}
+			}
+		})
+		srv := r.ServerKeepAlive(sv.Listen)
+		//构造
+
+		s.Logger.Printf(infoServerPrefix+"start to accept http conn: %v\n", srv.Addr)
+		s.httpServers = append(s.httpServers, srv)
+		if sv.SSL {
+			cfg := &tls.Config{}
+			for _, domain := range sv.Domain {
+				if domain.CertFile != "" && domain.KeyFile != "" {
+					cert, err := tls.LoadX509KeyPair(domain.CertFile, domain.KeyFile)
+					if err != nil {
+						log.Fatal(err)
+					}
+					cfg.Certificates = append(cfg.Certificates, cert)
+				}
+			}
+			cfg.BuildNameToCertificate()
+			srv.TLSConfig = cfg
+			go func() {
+				err := srv.ListenAndServeTLS("", "")
+				if err != http.ErrServerClosed {
+					s.Logger.Printf(errorServerPrefix+"start http server error: %s\n", err)
+				}
+				s.Logger.Printf(infoServerPrefix+"stop http server %v\n", srv.Addr)
+			}()
+		} else {
+			go func() {
+				err := srv.ListenAndServe()
+				if err != http.ErrServerClosed {
+					s.Logger.Printf(errorServerPrefix+"start http server error: %s\n", err)
+				}
+				s.Logger.Printf(infoServerPrefix+"stop http server %v\n", srv.Addr)
+			}()
+		}
 	}
+	return nil
 }
 
 func (s *Server) Reload() error {
@@ -84,17 +132,18 @@ func (s *Server) Reload() error {
 		return nil
 	}
 	//stop all httpServer
-	for _, sv := range s.httpServers {
+	for _, srv := range s.httpServers {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
-		sv.Shutdown(ctx)
+		err := srv.Shutdown(ctx)
+		if err != nil {
+			s.Logger.Printf(errorServerPrefix+"stop http server err %v\n", err)
+		}
 	}
 	//reload config
 	sections.Load()
-
 	s.httpServers = []*http.Server{}
-	s.setupCart()
-	go server.listenHttp() //listen http
+	go s.setupCart()
 	return nil
 }
 

@@ -1,5 +1,6 @@
 package sections
 
+//load section in load.go file
 type endpoint struct {
 	Method  string   `yaml:"method,omitempty"`
 	Servers []string `yaml:"servers,omitempty"`

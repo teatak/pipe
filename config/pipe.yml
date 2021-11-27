@@ -3,26 +3,33 @@ riff:
 
 endpoint:
   api:
-    method: ipHash #robin round hash hashRing
+    method: hash #robin round hash hashRing
     servers: 
       - http://api
   console:
-    method: ipHash
+    method: hash
     servers:
       - http://console
-    
-servers:
-  - listen: "[::]:443 ssl"
+      
+server:
+  - listen: "[::]:80"
+    domain:
+      - name: _
+        return: "301 https://$host$request_uri"
+  - listen: "[::]:443"
+    ssl: true
     domain:
       - name: api.teatak.com
-        certFile: "/data/cert/api.teatak.com"
-        keyFile: "/data/cert/api.teatak.com"
+        certFile: "/Users/yanggang/Downloads/cert/api.teatak.com.pem"
+        keyFile: "/Users/yanggang/Downloads/cert/api.teatak.com.key"
         location: 
           - path: /
             to: http://api
           - path: /api
             to: http://api
       - name: _
+        # certFile: "/Users/yanggang/Downloads/cert/console.teatak.com.pem"
+        # keyFile: "/Users/yanggang/Downloads/cert/console.teatak.com.key"
         location: 
           - path: /
             to: http://console

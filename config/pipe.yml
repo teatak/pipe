@@ -20,8 +20,8 @@ server:
     ssl: true
     domain:
       - name: api.teatak.com
-        certFile: "/Users/yanggang/Downloads/cert/api.teatak.com.pem"
-        keyFile: "/Users/yanggang/Downloads/cert/api.teatak.com.key"
+        certFile: "/Users/yanggang/workspace/cert/api.teatak.com.pem"
+        keyFile: "/Users/yanggang/workspace/cert/api.teatak.com.key"
         location: 
           - path: /
             to: http://api

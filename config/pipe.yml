@@ -27,9 +27,15 @@ server:
             to: http://api
           - path: /api
             to: http://api
-      - name: _
-        # certFile: "/Users/yanggang/Downloads/cert/console.teatak.com.pem"
-        # keyFile: "/Users/yanggang/Downloads/cert/console.teatak.com.key"
+      - name: console.teatak.com
+        certFile: "/Users/yanggang/workspace/cert/console.teatak.com.pem"
+        keyFile: "/Users/yanggang/workspace/cert/console.teatak.com.key"
+        location: 
+          - path: /
+            to: http://console
+      - name: www.teatak.com
+        certFile: "/Users/yanggang/workspace/cert/teatak.com.pem"
+        keyFile: "/Users/yanggang/workspace/cert/teatak.com.key"
         location: 
           - path: /
             to: http://console

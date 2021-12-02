@@ -59,11 +59,6 @@ func (s *Server) setupCart() error {
 			switch c.Request.Host {
 
 			}
-			// sort.Slice(sv.Domain, func(i, j int) bool {
-			// 	return sv.Domain[j].Name == "_"
-			// })
-			//match host
-			//sort domain name
 			findHost := false
 			for _, domain := range sv.Domain {
 				for _, _ = range domain.Location {

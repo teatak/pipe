@@ -10,6 +10,8 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -49,36 +51,108 @@ func NewServer() (*Server, error) {
 	return server, nil
 }
 
+func (s *Server) excuteDoamin(domain *sections.Domain, c *cart.Context, n cart.Next) {
+	if domain != nil {
+		for _, location := range domain.Location {
+			match := false
+			regex := false
+			path := location.Path
+			//match regex path
+			if location.Path[0] == '~' {
+				path = strings.TrimSpace(location.Path[1:])
+				regex = true
+			}
+			if regex {
+				match, _ = regexp.MatchString(path, c.Request.RequestURI)
+			} else {
+				if strings.HasPrefix(c.Request.RequestURI, path) {
+					match = true
+				}
+				if path == "/" {
+					match = true
+				}
+			}
+			if match {
+				if len(location.Header) != 0 {
+					for _, header := range location.Header {
+						arr := strings.SplitN(header, " ", 2)
+						key := arr[0]
+						value := arr[1]
+						c.Response.Header().Set(key, value)
+					}
+				}
+				if location.Return != "" {
+					arr := strings.SplitN(location.Return, " ", 3)
+					code, _ := strconv.Atoi(arr[0])
+					_type := arr[1]
+					content := ""
+					if len(arr) > 2 {
+						content = arr[2]
+					}
+					switch code {
+					case 301, 302: //move
+						path := _type
+						path = strings.ReplaceAll(path, "$host", c.Request.Host)
+						path = strings.ReplaceAll(path, "$request_uri", c.Request.RequestURI)
+						c.Redirect(code, path)
+					default:
+						c.Response.WriteHeader(code)
+						switch _type {
+						case "json":
+							header := c.Response.Header()
+							header["Content-Type"] = []string{"application/json; charset=utf-8"}
+							c.Response.Write([]byte(content))
+						case "html":
+							header := c.Response.Header()
+							header["Content-Type"] = []string{"text/html; charset=utf-8"}
+							c.Response.Write([]byte(content))
+						case "string":
+							header := c.Response.Header()
+							header["Content-Type"] = []string{"text/plain; charset=utf-8"}
+							c.Response.Write([]byte(content))
+						case "file":
+							c.File(content)
+						case "static":
+							c.Static(content, path, true)
+						default:
+
+						}
+
+					}
+				}
+				break
+			}
+		}
+	}
+	n()
+}
+
 func (s *Server) setupCart() error {
 	for _, sv := range *sections.Server {
 		cart.SetMode(cart.ReleaseMode)
 		r := cart.New()
-
+		tempDomain := sv.Domain
 		//构造
 		r.Use("/", func(c *cart.Context, n cart.Next) {
-			switch c.Request.Host {
-
-			}
+			//timer
+			since := time.Now()
+			defer func() {
+				d := time.Since(since)
+				log.Println("[Track]", c.Request.RequestURI, d)
+			}()
 			findHost := false
-			for _, domain := range sv.Domain {
-				for _, _ = range domain.Location {
-					//fmt.Println(path, localtion)
-				}
+			var defaultDoamin *sections.Domain
+			for _, domain := range tempDomain {
 				if strings.EqualFold(domain.Name, c.Request.Host) {
 					findHost = true
-					if c.Request.TLS == nil {
-						c.Redirect(301, "https://"+c.Request.Host+c.Request.RequestURI)
-					} else {
-						c.JSON(200, cart.H{"code": 200})
-					}
+					s.excuteDoamin(domain, c, n)
+				}
+				if domain.Name == "_" {
+					defaultDoamin = domain
 				}
 			}
 			if !findHost {
-				if c.Request.TLS == nil {
-					c.Redirect(301, "https://"+c.Request.Host+c.Request.RequestURI)
-				} else {
-					c.JSON(200, cart.H{"code": 200})
-				}
+				s.excuteDoamin(defaultDoamin, c, n)
 			}
 		})
 		srv := r.ServerKeepAlive(sv.Listen)

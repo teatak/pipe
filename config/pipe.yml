@@ -15,7 +15,17 @@ server:
   - listen: "[::]:80"
     domain:
       - name: _
-        return: "301 https://$host$request_uri"
+        location:
+          - path: /static/
+            return: "200 static /Users/yanggang/workspace/github.com/teatak/pipe/static/"
+          - path: /favicon.ico
+            return: "200 file /Users/yanggang/workspace/github.com/teatak/pipe/static/favicon.ico"
+          - path: ~ ^/string$ # regex
+            return: "200 string hello string"
+          - path: /https
+            return: "301 https://$host$request_uri"
+          - path: /redirect
+            return: "301 /string"
   - listen: "[::]:443"
     ssl: true
     domain:
@@ -33,10 +43,13 @@ server:
         location: 
           - path: /
             to: http://console
-      - name: www.teatak.com
+      - name: _
         certFile: "/Users/yanggang/workspace/cert/teatak.com.pem"
         keyFile: "/Users/yanggang/workspace/cert/teatak.com.key"
         location: 
           - path: /
-            to: http://console
+            return: "200 text"
+            header: 
+              - "Content-Type text/plain; charset=utf-8"
+            # to: http://console
   

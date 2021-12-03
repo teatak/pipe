@@ -16,14 +16,23 @@ server:
     domain:
       - name: _
         location:
+            # return static folder
           - path: /static/
             return: "200 static /Users/yanggang/workspace/github.com/teatak/pipe/static/"
+
+            # return a file
           - path: /favicon.ico
             return: "200 file /Users/yanggang/workspace/github.com/teatak/pipe/static/favicon.ico"
+
+            # return string
           - path: ~ ^/string$ # regex
             return: "200 string hello string"
+
+            # redirect
           - path: /https
             return: "301 https://$host$request_uri"
+
+            # redirect
           - path: /redirect
             return: "301 /string"
   - listen: "[::]:443"

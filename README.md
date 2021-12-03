@@ -40,7 +40,6 @@ server:
             # redirect
           - path: /redirect
             return: "301 /string"
-            
   - listen: "[::]:443"
     ssl: true
     domain:

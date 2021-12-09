@@ -5,8 +5,8 @@ type riff struct {
 	Url string `yaml:"url,omitempty"`
 }
 
-func (s *riff) SectionName() string {
+func (s riff) SectionName() string {
 	return "riff"
 }
 
-var Riff = &riff{}
+var Riff = riff{}

@@ -10,7 +10,7 @@ func init() {
 
 func Load() {
 	config.LoadConfig()
-	config.Load(Riff)
-	config.Load(Endpoint)
-	config.Load(Server)
+	config.Load(&Riff)
+	config.Load(&Backends)
+	config.Load(&Servers)
 }

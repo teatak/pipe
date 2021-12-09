@@ -1,7 +1,7 @@
 package sections
 
 //load section in load.go file
-type server struct {
+type Server struct {
 	Listen string    `yaml:"listen,omitempty"`
 	SSL    bool      `yaml:"ssl,omitempty"`
 	Domain []*Domain `yaml:"domain,omitempty"`
@@ -17,14 +17,13 @@ type Domain struct {
 type Location struct {
 	Path   string   `yaml:"path,omitempty"`
 	Header []string `yaml:"header,omitempty"`
-	Proxy  string   `yaml:"proxy,omitempty"`
 	Return string   `yaml:"return,omitempty"`
 }
 
-type serverSection []*server
+type serverSection []*Server
 
-func (s *serverSection) SectionName() string {
+func (s serverSection) SectionName() string {
 	return "server"
 }
 
-var Server = &serverSection{}
+var Servers = serverSection{}

@@ -4,3 +4,5 @@ run/
 .DS_Store
 pipe
 static/
+pkg/
+bin/

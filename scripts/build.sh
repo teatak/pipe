@@ -6,7 +6,7 @@ cd ..
 
 BIN="pipe"
 TYPE="release"
-VERSION="v$(cat .version)"
+VERSION="$(cat .version)"
 GITSHA="$(git rev-parse HEAD)"
 GITBRANCH="$(git rev-parse --abbrev-ref HEAD)"
 

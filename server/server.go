@@ -264,7 +264,7 @@ func (s *Server) setupCart() error {
 			since := time.Now()
 			defer func() {
 				d := time.Since(since)
-				s.Logger.Printf(infoServerPrefix+"track %v %v \n", c.Request.RequestURI, d)
+				s.Logger.Printf(infoServerPrefix+"track %v %v %v \n", c.Request.Host, c.Request.RequestURI, d)
 			}()
 			findHost := false
 			var defaultDoamin *sections.Domain

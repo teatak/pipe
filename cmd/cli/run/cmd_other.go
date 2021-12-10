@@ -21,7 +21,7 @@ func (c *cmd) Run(args []string) int {
 		fmt.Println(err)
 		return 1
 	}
-	pid := os.Getegid()
+	pid := os.Getpid()
 	s.Logger.Printf(infoServerPrefix+"start server pid:%v\n", pid)
 	setPid(pid)
 	sigs := make(chan os.Signal, 10)

@@ -3,7 +3,7 @@ default:
 	@echo "--> Running build"
 	@sh -c "$(CURDIR)/scripts/build.sh"
 
-dev: assets
+dev:
 	@echo "--> Running build"
 	@DEV=1 sh -c "'$(CURDIR)/scripts/build.sh'"
 

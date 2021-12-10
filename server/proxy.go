@@ -72,17 +72,19 @@ func NewProxy(backend *sections.Backend) (*httputil.ReverseProxy, error) {
 			nodes := []string{}
 			_url := ""
 			//load from riff
-			for _, tempServer := range backend.Server {
-				serviceName, _ := url.Parse(tempServer)
-				if strings.Contains(serviceName.Host, ":") {
+			if backend.Riff != "" {
+				arr := strings.Split(backend.Riff, "@")
+				serviceName := arr[0]
+				riffUrl := arr[1]
+				client, _ := api.RiffClient(riffUrl)
+				service := client.Services(serviceName, api.StateAlive)
+				for _, node := range service.NestNodes {
+					nodeString := "http://" + node.IP + ":" + strconv.Itoa(node.Port)
+					nodes = append(nodes, nodeString)
+				}
+			} else {
+				for _, tempServer := range backend.Server {
 					nodes = append(nodes, tempServer)
-				} else {
-					client, _ := api.RiffClient(sections.Riff.Url)
-					service := client.Services(serviceName.Host, api.StateAlive)
-					for _, node := range service.NestNodes {
-						nodeString := serviceName.Scheme + "://" + node.IP + ":" + strconv.Itoa(node.Port)
-						nodes = append(nodes, nodeString)
-					}
 				}
 			}
 

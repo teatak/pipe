@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/teatak/pipe/cmd/cli"
 	"github.com/teatak/pipe/server"
 )
 
@@ -24,7 +25,7 @@ func (c *cmd) Run(args []string) int {
 	}
 	pid := os.Getpid()
 	s.Logger.Printf(infoServerPrefix+"start server %v\n", pid)
-	setPid(pid)
+	cli.SetPid(pid)
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {

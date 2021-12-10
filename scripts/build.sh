@@ -61,7 +61,8 @@ done
 
 DEV_PLATFORM="./pkg/$(go env GOOS)_$(go env GOARCH)"
 for F in $(find ${DEV_PLATFORM} -mindepth 1 -maxdepth 1 -type f); do
-    cp ${F} bin/
+    cp -r ./configinit/ ./bin/config/
+    cp ${F} ./bin/
 done
 
 # Zip and copy to the dist dir

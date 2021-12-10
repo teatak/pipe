@@ -66,7 +66,7 @@ func (c *cmd) Start(args []string) error {
 	if err != nil {
 		return err
 	} else {
-		cli.SetPid(cmd.Process.Pid)
+		//cli.SetPid(cmd.Process.Pid)
 		fmt.Println("start pipe success")
 	}
 	return nil

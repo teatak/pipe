@@ -4,6 +4,7 @@ package sections
 type Backend struct {
 	Name   string   `yaml:"name,omitempty"`
 	Mode   string   `yaml:"mode,omitempty"`
+	Riff   string   `yaml:"riff,omitempty"`
 	Server []string `yaml:"server,omitempty"`
 }
 

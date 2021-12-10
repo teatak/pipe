@@ -3,14 +3,10 @@
 a reverse proxy server
 
 ```yaml
-riff:
-  url: riff://localhost:8630
-
 backend:
   - name: test
     mode: hash #random 随机 roundRobin 轮训 hash 哈希 consistentHash 一致性哈希
-    server: 
-      - http://test
+    riff: test@riff://localhost:8630  #riff service
   - name: riff
     mode: hash
     server:

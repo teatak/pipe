@@ -69,8 +69,9 @@ for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
     OSARCH=$(basename ${PLATFORM})
     echo "Packaging ${OSARCH}"
 
+    cp -r ./config/ ./pkg/${OSARCH}/config/
     pushd $PLATFORM >/dev/null 2>&1
-    zip ../${OSARCH}.zip ./* >/dev/null 2>&1
+    zip -r ../${OSARCH}.zip ./* >/dev/null 2>&1
     popd >/dev/null 2>&1
 done
 

@@ -61,7 +61,7 @@ func (c *cmd) Update() {
 				fmt.Print("downloading...")
 				zipFile := runtime.GOOS + "_" + runtime.GOARCH + ".zip"
 				downloadUrl := "https://github.com/teatak/pipe/releases/download/" + version + "/" + zipFile
-				file := common.BinDir + "/update/riff/" + version + "/" + zipFile
+				file := common.BinDir + "/update/pipe/" + version + "/" + zipFile
 				dir := common.BinDir
 				progress := func(current, total int32) {
 					fmt.Printf("\r%s", strings.Repeat(" ", 45))

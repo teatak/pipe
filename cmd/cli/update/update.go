@@ -69,7 +69,7 @@ func (c *cmd) Update() {
 					// We use the humanize package to print the bytes in a meaningful way (e.g. 10 MB)
 					c := math.Round(float64(current)/1024/1024*100) / 100
 					t := math.Round(float64(total)/1024/1024*100) / 100
-					s := fmt.Sprintf("%vM/%vM", c, t)
+					s := fmt.Sprintf("%.2fM/%.2fM", c, t)
 					fmt.Printf("\rdownloading... %s complete", s)
 				}
 				if err := client.DownloadFile(file, downloadUrl, progress); err != nil {

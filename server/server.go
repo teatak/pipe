@@ -50,7 +50,7 @@ func NewServer() (*Server, error) {
 	return server, nil
 }
 
-func (s *Server) handleDoamin(domain *sections.Domain, c *cart.Context, n cart.Next) {
+func (s *Server) handleDomain(domain *sections.Domain, c *cart.Context, n cart.Next) {
 	if domain != nil {
 		var matchLocation *sections.Location
 		var defaultLocation *sections.Location
@@ -264,7 +264,8 @@ func (s *Server) setupCart() error {
 			since := time.Now()
 			defer func() {
 				d := time.Since(since)
-				s.Logger.Printf(infoServerPrefix+"track %v %v %v \n", c.Request.Host, c.Request.RequestURI, d)
+				clientIp := GetClientIp(c.Request)
+				s.Logger.Printf(infoServerPrefix+"track %v %v %v \n", clientIp, c.Request.RequestURI, d)
 			}()
 			findHost := false
 			var defaultDoamin *sections.Domain
@@ -276,13 +277,13 @@ func (s *Server) setupCart() error {
 					for _, temp := range domains {
 						if strings.EqualFold(temp, c.Request.Host) {
 							findHost = true
-							s.handleDoamin(domain, c, n)
+							s.handleDomain(domain, c, n)
 						}
 					}
 				}
 			}
 			if !findHost {
-				s.handleDoamin(defaultDoamin, c, n)
+				s.handleDomain(defaultDoamin, c, n)
 			}
 		})
 		srv := r.ServerKeepAlive(sv.Listen)

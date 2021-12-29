@@ -76,16 +76,17 @@ func NewProxy(backend *sections.Backend) (*httputil.ReverseProxy, error) {
 				arr := strings.Split(backend.Riff, "@")
 				serviceName := arr[0]
 				riffUrl := arr[1]
-				client, _ := api.RiffClient(riffUrl)
+				client, err := api.RiffClient(riffUrl)
+				if err != nil {
+					return
+				}
 				service := client.Services(serviceName, api.StateAlive)
 				for _, node := range service.NestNodes {
 					nodeString := "http://" + node.IP + ":" + strconv.Itoa(node.Port)
 					nodes = append(nodes, nodeString)
 				}
 			} else {
-				for _, tempServer := range backend.Server {
-					nodes = append(nodes, tempServer)
-				}
+				nodes = append(nodes, backend.Server...)
 			}
 
 			ip := GetClientIp(req)
@@ -102,6 +103,9 @@ func NewProxy(backend *sections.Backend) (*httputil.ReverseProxy, error) {
 				//roundRobin
 				_url, _ = loadbalance.Random(nodes)
 
+			}
+			if _url == "" {
+				return
 			}
 			target, err := url.Parse(_url)
 			if err != nil {

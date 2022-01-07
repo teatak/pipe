@@ -139,6 +139,8 @@ func (s *Server) handleDomain(domain *sections.Domain, c *cart.Context, n cart.N
 				}
 			}
 		}
+	} else {
+		s.Error502("domain "+c.Request.Host, c.Response)
 	}
 	n()
 }
@@ -274,7 +276,8 @@ func (s *Server) setupCart() error {
 				} else {
 					domains := strings.Split(domain.Name, " ")
 					for _, temp := range domains {
-						if strings.EqualFold(temp, c.Request.Host) {
+						match, _ := regexp.MatchString(temp, c.Request.Host)
+						if match {
 							findHost = true
 							s.handleDomain(domain, c, n)
 						}

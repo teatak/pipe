@@ -11,6 +11,10 @@ backend:
 server:
   - listen: "[::]:80"
     domain:
+      - name: .*alocalhost
+        location:
+          - path: /
+            return: "string 200 default localhost"
       - name: _
         location:
             # return static folder

@@ -1,7 +1,7 @@
 backend:
   - name: test
     mode: hash #random 随机 roundRobin 轮训 hash 哈希 consistentHash 一致性哈希
-    riff: test@riff://localhost:8630  #riff service
+    riff: test@riff://localhost:8630 #riff service
   - name: riff
     mode: hash
     server:
@@ -17,9 +17,11 @@ server:
             return: "string 200 default localhost"
       - name: _
         location:
-            # return static folder
+          # return static folder
           - path: /static/
             return: "static /Users/yanggang/workspace/github.com/teatak/pipe/static/"
+          - path: /ui/
+            return: "static /Users/yanggang/workspace/github.com/teatak/ui/docs/"
             # return a file
           - path: /favicon.ico
             return: "file /Users/yanggang/workspace/github.com/teatak/pipe/static/favicon.ico"
@@ -31,7 +33,7 @@ server:
             return: "redirect 301 https://$host$request_uri"
             # redirect
           - path: /redirect
-            return: "redirect 301 /string" 
+            return: "redirect 301 /string"
             #backend
           - path: /backend
             return: "backend test"
@@ -44,7 +46,7 @@ server:
   #     - name: dev.x-t.top console.teatak.com
   #       certFile: "/Users/yanggang/workspace/cert/dev.x-t.top.pem"
   #       keyFile: "/Users/yanggang/workspace/cert/dev.x-t.top.key"
-  #       location: 
+  #       location:
   #         - path: /
   #           return: "backend test"
   #         - path: /ws
@@ -62,14 +64,14 @@ server:
   #     - name: teatak.com www.teatak.com
   #       certFile: "/Users/yanggang/workspace/cert/teatak.com.pem"
   #       keyFile: "/Users/yanggang/workspace/cert/teatak.com.key"
-  #       location: 
+  #       location:
   #         - path: /
   #           return: "backend test"
   #     - name: _
   #       certFile: "/Users/yanggang/workspace/cert/teatak.com.pem"
   #       keyFile: "/Users/yanggang/workspace/cert/teatak.com.key"
-  #       location: 
+  #       location:
   #         - path: /
   #           return: "string 200 index"
-  #           header: 
-  #             - "Content-Type text/plain; charset=utf-8"  
+  #           header:
+  #             - "Content-Type text/plain; charset=utf-8"

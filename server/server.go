@@ -131,7 +131,17 @@ func (s *Server) handleDomain(domain *sections.Domain, c *cart.Context, n cart.N
 					if location.Path[0] == '~' {
 						path = strings.TrimSpace(location.Path[1:])
 					}
-					c.Static(content, path, true)
+					if path[len(path)-1] != '/' {
+						//add suffix /
+						if path == c.Request.RequestURI {
+							c.Redirect(302, path+"/")
+						} else {
+							c.Static(content, path+"/", true)
+						}
+					} else {
+						fmt.Println(path, c.Request.RequestURI)
+						c.Static(content, path, true)
+					}
 				case "backend":
 					s.handleBackend(content, c, n)
 				default:

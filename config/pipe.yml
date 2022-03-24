@@ -20,7 +20,7 @@ server:
           # return static folder
           - path: /static/
             return: "static /Users/yanggang/workspace/github.com/teatak/pipe/static/"
-          - path: /ui/
+          - path: /ui
             return: "static /Users/yanggang/workspace/github.com/teatak/ui/docs/"
             # return a file
           - path: /favicon.ico

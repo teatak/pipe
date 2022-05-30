@@ -217,7 +217,7 @@ func (s *Server) Error502(content string, resp http.ResponseWriter) {
 		panic(err)
 	}
 
-	htmlContent := fmt.Sprintf("The <b style='color:red'>%v</b> is bad", content)
+	htmlContent := fmt.Sprintf("The <b style='color:red'>%v</b> error", content)
 
 	obj := cart.H{
 		"Title":   "502 Bad Gateway",

@@ -275,12 +275,18 @@ func (s *Server) setupCart() error {
 					defaultDoamin = domain
 				} else {
 					domains := strings.Split(domain.Name, " ")
+					match := false
 					for _, temp := range domains {
-						match, _ := regexp.MatchString(temp, c.Request.Host)
+						if strings.EqualFold(temp, c.Request.Host) {
+							match = true
+						}
 						if match {
 							findHost = true
 							s.handleDomain(domain, c, n)
 						}
+					}
+					if findHost {
+						break //if match then break loop
 					}
 				}
 			}

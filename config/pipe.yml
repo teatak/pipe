@@ -1,77 +1,69 @@
 backend:
-  - name: test
-    mode: hash #random 随机 roundRobin 轮训 hash 哈希 consistentHash 一致性哈希
-    riff: test@riff://localhost:8630 #riff service
+  - name: api
+    mode: consistentHash #random 随机 roundRobin 轮训 hash 哈希 consistentHash 一致性哈希
+    riff: api@riff://localhost:8630 #riff server
+  - name: console
+    mode: consistentHash
+    riff: console@riff://localhost:8630
+  - name: short
+    mode: consistentHash
+    riff: short@riff://localhost:8630
+  - name: portal
+    mode: consistentHash
+    riff: portal@riff://localhost:8630
   - name: riff
     mode: hash
     server:
-      - http://127.0.0.1:8610
-      - http://127.0.0.1:8610
+      - http://localhost:8610
 
 server:
   - listen: "[::]:80"
     domain:
-      - name: .*alocalhost
+      - name: www.teatak.com
         location:
           - path: /
-            return: "string 200 default localhost"
+            return: "redirect 301 https://teatak.com$request_uri"
       - name: _
         location:
-          # return static folder
-          - path: /static/
-            return: "static /Users/yanggang/workspace/github.com/teatak/pipe/static/"
-          - path: /ui/
-            return: "static /Users/yanggang/workspace/github.com/teatak/ui/docs/"
-            # return a file
-          - path: /favicon.ico
-            return: "file /Users/yanggang/workspace/github.com/teatak/pipe/static/favicon.ico"
-            # return string
-          - path: ~ ^/string$ # regex
-            return: "string 200 hello string"
-            # redirect
-          - path: /https
-            return: "redirect 301 https://$host$request_uri"
-            # redirect
-          - path: /redirect
-            return: "redirect 301 /string"
-            #backend
-          - path: /backend
-            return: "backend test"
-            # default
+          # redirect
           - path: /
-            return: "string 200 default"
-  # - listen: "[::]:443"
-  #   ssl: true
-  #   domain:
-  #     - name: dev.x-t.top console.teatak.com
-  #       certFile: "/Users/yanggang/workspace/cert/dev.x-t.top.pem"
-  #       keyFile: "/Users/yanggang/workspace/cert/dev.x-t.top.key"
-  #       location:
-  #         - path: /
-  #           return: "backend test"
-  #         - path: /ws
-  #           return: "backend riff"
-  #         - path: /api
-  #           return: "backend riff"
-  #         - path: /console
-  #           return: "backend riff"
-  #         - path: /static/
-  #           return: "backend riff"
-  #         - path: /bad
-  #           return: "backend bad"
-  #         - path: /test
-  #           return: "backend test"
-  #     - name: teatak.com www.teatak.com
-  #       certFile: "/Users/yanggang/workspace/cert/teatak.com.pem"
-  #       keyFile: "/Users/yanggang/workspace/cert/teatak.com.key"
-  #       location:
-  #         - path: /
-  #           return: "backend test"
-  #     - name: _
-  #       certFile: "/Users/yanggang/workspace/cert/teatak.com.pem"
-  #       keyFile: "/Users/yanggang/workspace/cert/teatak.com.key"
-  #       location:
-  #         - path: /
-  #           return: "string 200 index"
-  #           header:
-  #             - "Content-Type text/plain; charset=utf-8"
+            return: "redirect 301 https://$host$request_uri"
+  - listen: "[::]:443"
+    ssl: true
+    domain:
+      - name: dev.x-t.top
+        certFile: "/Users/yanggang/Documents/cert/x-t.pem"
+        keyFile: "/Users/yanggang/Documents/cert/x-t.key"
+        location:
+          - path: /
+            return: "backend riff"
+      - name: console.teatak.com
+        certFile: "/Users/yanggang/Documents/cert/x-t.pem"
+        keyFile: "/Users/yanggang/Documents/cert/x-t.key"
+        location:
+          - path: /
+            return: "backend console"
+      - name: www.teatak.com
+        certFile: "/Users/yanggang/Documents/cert/x-t.pem"
+        keyFile: "/Users/yanggang/Documents/cert/x-t.key"
+        location:
+          - path: /
+            return: "redirect 301 https://teatak.com$request_uri"
+      - name: teatak.com
+        certFile: "/Users/yanggang/Documents/cert/x-t.pem"
+        keyFile: "/Users/yanggang/Documents/cert/x-t.key"
+        location:
+          - path: /
+            return: "backend portal"
+      - name: api.teatak.com
+        certFile: "/Users/yanggang/Documents/cert/x-t.pem"
+        keyFile: "/Users/yanggang/Documents/cert/x-t.key"
+        location:
+          - path: /
+            return: "backend api"
+      - name: _
+        certFile: "/Users/yanggang/Documents/cert/x-t.pem"
+        keyFile: "/Users/yanggang/Documents/cert/x-t.key"
+        location:
+          - path: /
+            return: "string 200 *.teatak.com"

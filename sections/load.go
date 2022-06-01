@@ -9,6 +9,7 @@ func init() {
 }
 
 func Load() {
+	config.LoadConfig()
 	config.Load(&Backends)
 	config.Load(&Servers)
 }

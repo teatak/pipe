@@ -16,6 +16,10 @@ import (
 
 var proxys = make(map[string]*httputil.ReverseProxy)
 
+func clearProxys() {
+	proxys = make(map[string]*httputil.ReverseProxy)
+}
+
 func singleJoiningSlash(a, b string) string {
 	aslash := strings.HasSuffix(a, "/")
 	bslash := strings.HasPrefix(b, "/")

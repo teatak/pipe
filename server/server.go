@@ -45,6 +45,7 @@ func NewServer() (*Server, error) {
 	logOutput := io.MultiWriter(os.Stderr)
 	server.Logger = log.New(logOutput, "", log.LstdFlags|log.Lmicroseconds)
 
+	sections.Load()
 	go server.setupCart()
 
 	return server, nil
@@ -351,6 +352,7 @@ func (s *Server) Reload() error {
 	//reload config
 	sections.Load()
 	s.httpServers = []*http.Server{}
+	clearProxys()
 	go s.setupCart()
 	return nil
 }

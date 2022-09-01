@@ -96,47 +96,90 @@ func (s *Server) handleDomain(domain *sections.Domain, c *cart.Context, n cart.N
 				}
 			}
 			if location.Return != "" {
-				arr := strings.SplitN(location.Return, " ", 3)
+				arr := strings.SplitN(location.Return, " ", 2)
 				_type := arr[0]
-				code := 0
 				content := arr[1]
-				if len(arr) > 2 {
-					code, _ = strconv.Atoi(arr[1])
-					content = arr[2]
-				}
+				// if len(arr) > 2 {
+				// 	code, _ = strconv.Atoi(arr[1])
+				// 	content = arr[2]
+				// }
+				errorText := ""
 				switch _type {
 				case "redirect":
-					path := content
-					path = strings.ReplaceAll(path, "$host", c.Request.Host)
-					path = strings.ReplaceAll(path, "$request_uri", c.Request.RequestURI)
-					c.Redirect(code, path)
+					_arr := strings.SplitN(content, " ", 2)
+					if len(_arr) > 1 {
+						code, _ := strconv.Atoi(_arr[0])
+						path := _arr[1]
+						path = strings.ReplaceAll(path, "$host", c.Request.Host)
+						path = strings.ReplaceAll(path, "$request_uri", c.Request.RequestURI)
+						c.Redirect(code, path)
+					} else {
+						errorText = "redirect format error"
+					}
 				case "json":
 					header := c.Response.Header()
 					header["Content-Type"] = []string{"application/json; charset=utf-8"}
-					c.Response.WriteHeader(code)
-					c.Response.Write([]byte(content))
+					_arr := strings.SplitN(content, " ", 2)
+					if len(_arr) > 1 {
+						code, _ := strconv.Atoi(_arr[0])
+						jsonText := _arr[1]
+						c.Response.WriteHeader(code)
+						c.Response.Write([]byte(jsonText))
+					} else {
+						errorText = "json format error"
+					}
+
 				case "html":
 					header := c.Response.Header()
 					header["Content-Type"] = []string{"text/html; charset=utf-8"}
-					c.Response.WriteHeader(code)
-					c.Response.Write([]byte(content))
+					_arr := strings.SplitN(content, " ", 2)
+					if len(_arr) > 1 {
+						code, _ := strconv.Atoi(_arr[0])
+						htmlText := _arr[1]
+						c.Response.WriteHeader(code)
+						c.Response.Write([]byte(htmlText))
+					} else {
+						errorText = "html format error"
+					}
 				case "string":
 					header := c.Response.Header()
 					header["Content-Type"] = []string{"text/plain; charset=utf-8"}
-					c.String(code, content)
+					_arr := strings.SplitN(content, " ", 2)
+					if len(_arr) > 1 {
+						code, _ := strconv.Atoi(_arr[0])
+						stringText := _arr[1]
+						c.String(code, stringText)
+					} else {
+						errorText = "string format error"
+					}
 				case "file":
 					c.File(content)
 				case "static":
+					_arr := strings.SplitN(content, " ", 2)
+					relativePath := ""
+					fallback := ""
+					if len(_arr) > 1 {
+						relativePath = _arr[0]
+						fallback = _arr[1]
+					} else {
+						relativePath = _arr[0]
+						fallback = ""
+					}
 					path := location.Path
 					//match regex path
 					if location.Path[0] == '~' {
 						path = strings.TrimSpace(location.Path[1:])
 					}
-					c.Static(content, path, true)
+					c.Static(relativePath, path, true, fallback)
 				case "backend":
 					s.handleBackend(content, c, n)
 				default:
 					s.Error502(domain.Name+" return type "+_type, c.Response)
+				}
+
+				if errorText != "" {
+					s.Error502(domain.Name+" "+errorText, c.Response)
+
 				}
 			}
 		}

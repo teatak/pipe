@@ -18,9 +18,9 @@ server:
     domain:
       - name: _
         location:
-            # return static folder
+            # return static folder [static path fallback_file_path]
           - path: /static/
-            return: "static /Users/yanggang/workspace/github.com/teatak/pipe/static/"
+            return: "static /Users/yanggang/workspace/github.com/teatak/pipe/static/ /Users/yanggang/workspace/github.com/teatak/pipe/static/index.html"
             # return a file
           - path: /favicon.ico
             return: "file /Users/yanggang/workspace/github.com/teatak/pipe/static/favicon.ico"

@@ -33,7 +33,8 @@ server:
             # redirect
           - path: /redirect
             return: "redirect 301 /string" 
-          - path: /backend
+            # multiple delimiters ; or ,
+          - path: /backend;/back,/end
             return: "backend test"
             # default
           - path: /

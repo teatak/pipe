@@ -70,8 +70,15 @@ func (s *Server) handleDomain(domain *sections.Domain, c *cart.Context, n cart.N
 				if path == "/" {
 					defaultLocation = location
 				} else {
-					if strings.HasPrefix(c.Request.RequestURI, path) {
-						match = true
+					//split by ; or ,
+					arr := strings.FieldsFunc(path, func(r rune) bool {
+						return r == ';' || r == ','
+					})
+					for _, _p := range arr {
+						if strings.HasPrefix(c.Request.RequestURI, _p) {
+							match = true
+							break
+						}
 					}
 				}
 			}

@@ -65,5 +65,5 @@ server:
         certFile: "/Users/yanggang/Documents/cert/x-t.pem"
         keyFile: "/Users/yanggang/Documents/cert/x-t.key"
         location:
-          - path: /
+          - path: /string,/text;/good
             return: "string 200 *.teatak.com"

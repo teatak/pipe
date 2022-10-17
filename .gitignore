@@ -6,3 +6,4 @@ pipe
 static/
 pkg/
 bin/
+config/

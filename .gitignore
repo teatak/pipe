@@ -1,7 +1,6 @@
-go.sum
 logs/
 run/
-.DS_Store
+**/.DS_Store
 pipe
 static/
 pkg/

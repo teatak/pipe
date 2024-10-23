@@ -13,6 +13,8 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/teatak/cart v1.0.15/go.mod h1:DgFl81qPa06Zmq6shou5pwObHSVgHWPKu8WHIeLjMCY=
 github.com/teatak/cart v1.0.16 h1:gV3g/3o4WSIskBwqIa1ndq+PXeUC0mR6CaOwNn3hHeQ=
 github.com/teatak/cart v1.0.16/go.mod h1:DgFl81qPa06Zmq6shou5pwObHSVgHWPKu8WHIeLjMCY=
+github.com/teatak/cart v1.0.17 h1:AX4IqDqZhUd1Sp6jVb4KkTVucKIkxffM+3LhMvGRwu4=
+github.com/teatak/cart v1.0.17/go.mod h1:DgFl81qPa06Zmq6shou5pwObHSVgHWPKu8WHIeLjMCY=
 github.com/teatak/config v1.0.1 h1:VMtZGcY9D3IAR5+9Cs0FaOHzd4CZPuMPoZ9UegQHn+0=
 github.com/teatak/config v1.0.1/go.mod h1:qORMeVJPYFSPRMXZJRJ9sBpnujsHvLRwGl7i6N0/u+0=
 github.com/teatak/riff v0.0.27 h1:88L14q5yrk0xC85hpUoihh0oTf409C/Ig1C3/yYb5ew=
